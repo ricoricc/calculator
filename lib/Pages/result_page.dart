@@ -1,7 +1,13 @@
+// ignore_for_file: prefer_const_constructors_in_immutables, use_key_in_widget_constructors, prefer_const_constructors
+
 import 'package:flutter/material.dart';
 
 class MyEpp extends StatelessWidget {
-  const MyEpp({Key? key}) : super(key: key);
+  final String calculation;
+  final String result;
+
+  const MyEpp({Key? key, required this.calculation, required this.result})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -10,9 +16,34 @@ class MyEpp extends StatelessWidget {
       title: "Calculator",
       home: Scaffold(
         appBar: AppBar(
-          title: const Text("Calculator"),
+          title: Text("Calculator"),
         ),
-        body: Column(),
+        body: Container(
+          padding: EdgeInsets.all(50),
+          alignment: Alignment.center,
+          child: Column(
+            children: [
+              Container(
+                padding: EdgeInsets.only(top: 20),
+                child: Column(
+                  children: [
+                    Text("Calculation: ", style: TextStyle(fontSize: 25)),
+                    Text(calculation, style: TextStyle(fontSize: 30)),
+                  ],
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.only(top: 20),
+                child: Column(
+                  children: [
+                    Text("Result: ", style: TextStyle(fontSize: 25)),
+                    Text(result, style: TextStyle(fontSize: 30)),
+                  ],
+                ),
+              )
+            ],
+          ),
+        ),
       ),
     );
   }
