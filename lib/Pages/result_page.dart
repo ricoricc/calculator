@@ -1,5 +1,6 @@
 // ignore_for_file: prefer_const_constructors_in_immutables, use_key_in_widget_constructors, prefer_const_constructors
 
+import 'package:calculator/Pages/calculator.dart';
 import 'package:flutter/material.dart';
 
 class MyEpp extends StatelessWidget {
@@ -38,6 +39,18 @@ class MyEpp extends StatelessWidget {
                   children: [
                     Text("Result: ", style: TextStyle(fontSize: 25)),
                     Text(result, style: TextStyle(fontSize: 30)),
+                    ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return historyPage();
+                              },
+                            ),
+                          );
+                        },
+                        child: Text("Result History"))
                   ],
                 ),
               )

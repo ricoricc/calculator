@@ -1,15 +1,23 @@
 // ignore_for_file: prefer_const_constructors_in_immutables, camel_case_types, use_key_in_widget_constructors, prefer_const_constructors
 
+import 'dart:ffi';
 import 'dart:math';
 
 import 'package:calculator/pages/result_page.dart';
 import 'package:flutter/material.dart';
+
+List<String> angka = [];
+List<String> temp = [];
+
+int filterCheck = 0;
 
 double result = 0.0;
 String calculation = "";
 String a = "", b = "";
 String operator = "";
 String numberPrint = '0';
+
+String filter = "";
 
 class printScreen extends StatelessWidget {
   printScreen({
@@ -90,6 +98,13 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  void tambahData() {
+    setState(() {
+      angka.add(result.toString());
+      angka.sort();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -386,5 +401,222 @@ class _MyAppState extends State<MyApp> {
         },
       ),
     );
+    tambahData();
+  }
+}
+
+class historyPage extends StatefulWidget {
+  const historyPage({Key? key}) : super(key: key);
+
+  @override
+  State<historyPage> createState() => _historyPageState();
+}
+
+class _historyPageState extends State<historyPage> {
+  final TextEditingController _filterController = TextEditingController();
+
+  void editFilter(String op) {
+    setState(() {
+      if (filterCheck == 0) {
+        if (_filterController.text.toString() != "") {
+          double x = double.parse(_filterController.text.toString());
+
+          temp.addAll(angka);
+          angka.clear();
+          filter = op + _filterController.text.toString();
+
+          if (op == ">") {
+            for (int i = 0; i < temp.length; i++) {
+              if (double.parse(temp[i]) > x) {
+                angka.add(temp[i]);
+              }
+            }
+          } else if (op == ">=") {
+            for (int i = 0; i < temp.length; i++) {
+              if (double.parse(temp[i]) >= x) {
+                angka.add(temp[i]);
+              }
+            }
+          } else if (op == "==") {
+            for (int i = 0; i < temp.length; i++) {
+              if (double.parse(temp[i]) == x) {
+                angka.add(temp[i]);
+              }
+            }
+          } else if (op == "<=") {
+            for (int i = 0; i < temp.length; i++) {
+              if (double.parse(temp[i]) <= x) {
+                angka.add(temp[i]);
+              }
+            }
+          } else if (op == "<") {
+            for (int i = 0; i < temp.length; i++) {
+              if (double.parse(temp[i]) < x) {
+                angka.add(temp[i]);
+              }
+            }
+          }
+          angka.sort();
+          _filterController.text = "";
+        } else {
+          _filterController.text = "";
+        }
+        filterCheck = 1;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Reset Filter before applying other filter'),
+          ),
+        );
+      }
+    });
+  }
+
+  void resetFilter() {
+    setState(() {
+      if (filterCheck == 1) {
+        _filterController.text = "";
+        angka.clear();
+        angka.addAll(temp);
+        temp.clear();
+        angka.sort();
+        filterCheck = 0;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Filter Reset'),
+          ),
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _filterController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: "History Screen",
+        home: Scaffold(
+          appBar: AppBar(
+            title: Text("History Screen"),
+          ),
+          body: Container(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Text(
+                  "Result History",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Column(
+                  children: [
+                    TextField(
+                      controller: _filterController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: "Filter Masukan angka"),
+                    ),
+                    ElevatedButton(
+                      onPressed: () => resetFilter(),
+                      child: Text("Reset Filter"),
+                    ),
+                    Wrap(
+                      spacing: 12,
+                      alignment: WrapAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () => editFilter(">"),
+                          child: Text(">"),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => editFilter(">="),
+                          child: Text(">="),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => editFilter("=="),
+                          child: Text("=="),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => editFilter("<="),
+                          child: Text("<="),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => editFilter("<"),
+                          child: Text("<"),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      "Hasil Filter dari: $filter",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+                Expanded(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: angka.length,
+                    itemBuilder: (context, index) {
+                      return Dismissible(
+                        key: Key(angka[index]),
+                        background: Container(
+                          padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                          alignment: Alignment.centerLeft,
+                          color: Colors.red,
+                          child: Icon(Icons.delete),
+                        ),
+                        secondaryBackground: Container(
+                          padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
+                          alignment: Alignment.centerRight,
+                          color: Colors.blue,
+                          child: Icon(Icons.pending),
+                        ),
+                        confirmDismiss: (direction) async {
+                          if (direction == DismissDirection.endToStart) {
+                            return false;
+                          } else {
+                            return true;
+                          }
+                        },
+                        onDismissed: (direction) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('${angka[index]} dismissed'),
+                            ),
+                          );
+                          setState(() {
+                            angka.removeAt(index);
+                          });
+                        },
+                        child: ListTile(
+                          title: Text(angka[index]),
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(angka[index])));
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ));
   }
 }
